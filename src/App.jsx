@@ -25,7 +25,7 @@ const FIREBASE_URL = 'https://abalone-game-c31e4-default-rtdb.europe-west1.fireb
 // Get neighbors (differ by 1, 9, or 11)
 function getNeighbors(cell) {
   const neighbors = [];
-  const candidates = [cell-1, cell+1, cell-9, cell+9, cell-11, cell+11];
+  const candidates = [cell-1, cell+1, cell-10, cell+10, cell-11, cell+11];
   for (let c of candidates) {
     if (CELL_SET.has(c)) neighbors.push(c);
   }
@@ -39,7 +39,7 @@ function isArithmeticSequence(cells) {
   const diff = sorted[1] - sorted[0];
   
   // Difference must be 1, 9, or 11
-  if (![1, 9, 11].includes(diff)) return false;
+  if (![1, 10, 11].includes(diff)) return false;
   
   for (let i = 2; i < sorted.length; i++) {
     if (sorted[i] - sorted[i-1] !== diff) return false;
@@ -245,7 +245,7 @@ function AbaloneGame() {
     
     const sorted = [...selected].sort((a,b) => a-b);
     const moves = [];
-    const directions = [1, -1, 9, -9, 11, -11];
+    const directions = [1, -1, 10, -10, 11, -11];
 
     for (let dir of directions) {
       const newCells = sorted.map(c => c + dir);
@@ -458,7 +458,7 @@ function AbaloneGame() {
             <p className="text-white text-center mb-2">Available Moves:</p>
             <div className="flex flex-wrap gap-2 justify-center">
               {moves.map((move, idx) => {
-                const arrow = {1: '→', [-1]: '←', 9: '↘', [-9]: '↖', 11: '↙', [-11]: '↗'}[move.dir];
+                const arrow = {1: '→', [-1]: '←', 10: '↘', [-10]: '↖', 11: '↙', [-11]: '↗'}[move.dir];
                 return (
                   <button
                     key={idx}
@@ -481,7 +481,7 @@ function AbaloneGame() {
         </button>
 
         <p className="text-gray-400 text-center text-xs mt-4">
-          🔓 Ctrl+Shift+D+E+S for developer surprise
+          🔓 Good Luck!!!
         </p>
       </div>
     </div>
