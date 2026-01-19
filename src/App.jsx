@@ -19,6 +19,9 @@ const CELL_SET = new Set(CELLS);
 const WHITE_INITIAL = [11,12,13,14,15,21,22,23,24,25,26,33,34,35];
 const BLACK_INITIAL = [73,74,75,81,82,83,84,85,86,91,92,93,94,95];
 
+// Firebase config - REPLACE WITH YOUR OWN
+const FIREBASE_URL = 'https://abalone-game-c31e4-default-rtdb.europe-west1.firebasedatabase.app/';
+
 // Get neighbors (differ by 1, 9, or 11)
 function getNeighbors(cell) {
   const neighbors = [];
@@ -44,19 +47,38 @@ function isArithmeticSequence(cells) {
   return true;
 }
 
-// Get direction from two cells
-function getDirection(from, to) {
-  return to - from;
-}
-
 // Generate game ID
 function generateGameId() {
   return Math.random().toString(36).substring(2, 10);
 }
 
+// Firebase API helpers
+async function saveGameToFirebase(gameId, gameData) {
+  try {
+    const response = await fetch(`${FIREBASE_URL}/games/${gameId}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(gameData)
+    });
+    return await response.json();
+  } catch (err) {
+    console.error('Save failed:', err);
+  }
+}
+
+async function loadGameFromFirebase(gameId) {
+  try {
+    const response = await fetch(`${FIREBASE_URL}/games/${gameId}.json`);
+    return await response.json();
+  } catch (err) {
+    console.error('Load failed:', err);
+    return null;
+  }
+}
+
 function AbaloneGame() {
   const [gameId, setGameId] = useState(null);
-  const [playerRole, setPlayerRole] = useState(null); // 'white' or 'black'
+  const [playerRole, setPlayerRole] = useState(null);
   const [board, setBoard] = useState({});
   const [currentTurn, setCurrentTurn] = useState('black');
   const [selected, setSelected] = useState([]);
@@ -66,6 +88,7 @@ function AbaloneGame() {
   const [scores, setScores] = useState({ white: 0, black: 0 });
   const [winner, setWinner] = useState(null);
   const [destroyed, setDestroyed] = useState(false);
+  const [loading, setLoading] = useState(false);
   const keySequence = useRef([]);
   const pollInterval = useRef(null);
 
@@ -85,7 +108,7 @@ function AbaloneGame() {
     
     pollInterval.current = setInterval(() => {
       loadGame(gameId);
-    }, 1000);
+    }, 2000);
 
     return () => {
       if (pollInterval.current) clearInterval(pollInterval.current);
@@ -112,28 +135,14 @@ function AbaloneGame() {
   }, []);
 
   async function loadGame(id) {
-    try {
-      const result = await window.storage.get(`game-${id}`, true);
-      if (result) {
-        const data = JSON.parse(result.value);
-        setBoard(data.board || {});
-        setCurrentTurn(data.currentTurn || 'black');
-        setPlayers(data.players || { white: false, black: false });
-        setGameStarted(data.gameStarted || false);
-        setScores(data.scores || { white: 0, black: 0 });
-        setWinner(data.winner || null);
-      }
-    } catch (err) {
-      console.log('Game not found, will create new');
-    }
-  }
-
-  async function saveGame(gameData) {
-    if (!gameId) return;
-    try {
-      await window.storage.set(`game-${gameId}`, JSON.stringify(gameData), true);
-    } catch (err) {
-      console.error('Save failed:', err);
+    const data = await loadGameFromFirebase(id);
+    if (data) {
+      setBoard(data.board || {});
+      setCurrentTurn(data.currentTurn || 'black');
+      setPlayers(data.players || { white: false, black: false });
+      setGameStarted(data.gameStarted || false);
+      setScores(data.scores || { white: 0, black: 0 });
+      setWinner(data.winner || null);
     }
   }
 
@@ -145,37 +154,47 @@ function AbaloneGame() {
 
   async function startGame() {
     if (!gameId) return;
+    setLoading(true);
+    
+    // Load current game state
+    const currentData = await loadGameFromFirebase(gameId);
     
     // Determine role
     let role = null;
-    if (!players.black) {
+    const currentPlayers = currentData?.players || { white: false, black: false };
+    
+    if (!currentPlayers.black) {
       role = 'black';
       setPlayerRole('black');
-    } else if (!players.white) {
+    } else if (!currentPlayers.white) {
       role = 'white';
       setPlayerRole('white');
     } else {
       setMessage('Game is full!');
+      setLoading(false);
       return;
     }
 
-    // Initialize board
-    const newBoard = {};
-    WHITE_INITIAL.forEach(c => newBoard[c] = 'white');
-    BLACK_INITIAL.forEach(c => newBoard[c] = 'black');
+    // Initialize board if first player
+    let newBoard = currentData?.board || {};
+    if (!currentPlayers.black && !currentPlayers.white) {
+      WHITE_INITIAL.forEach(c => newBoard[c] = 'white');
+      BLACK_INITIAL.forEach(c => newBoard[c] = 'black');
+    }
 
-    const newPlayers = { ...players, [role]: true };
+    const newPlayers = { ...currentPlayers, [role]: true };
     const gameData = {
       board: newBoard,
       currentTurn: 'black',
       players: newPlayers,
       gameStarted: newPlayers.white && newPlayers.black,
-      scores: { white: 0, black: 0 },
+      scores: currentData?.scores || { white: 0, black: 0 },
       winner: null
     };
 
-    await saveGame(gameData);
+    await saveGameToFirebase(gameId, gameData);
     await loadGame(gameId);
+    setLoading(false);
   }
 
   function handleCellClick(cell) {
@@ -296,7 +315,7 @@ function AbaloneGame() {
       winner: newWinner
     };
 
-    await saveGame(gameData);
+    await saveGameToFirebase(gameId, gameData);
     setSelected([]);
     await loadGame(gameId);
   }
@@ -327,6 +346,7 @@ function AbaloneGame() {
           >
             Create New Game
           </button>
+          <p className="text-xs text-gray-400 mt-4">Note: You need to set up Firebase first!</p>
         </div>
       </div>
     );
@@ -335,7 +355,7 @@ function AbaloneGame() {
   if (!gameStarted) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-900 to-green-700">
-        <div className="bg-amber-900 p-12 rounded-lg shadow-2xl text-center">
+        <div className="bg-amber-900 p-12 rounded-lg shadow-2xl text-center max-w-2xl">
           <h1 className="text-4xl font-bold text-white mb-4">Waiting for Players</h1>
           <p className="text-lg text-gray-300 mb-6">Share this link with your opponent:</p>
           <input
@@ -347,9 +367,10 @@ function AbaloneGame() {
           />
           <button
             onClick={startGame}
-            className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white text-xl font-bold rounded-lg transition"
+            disabled={loading}
+            className="px-8 py-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white text-xl font-bold rounded-lg transition"
           >
-            Join Game (Click to Start)
+            {loading ? 'Joining...' : 'Join Game (Click to Start)'}
           </button>
           <p className="text-sm text-gray-400 mt-4">
             {players.black ? '⚫ Black joined' : '⚫ Waiting...'}
