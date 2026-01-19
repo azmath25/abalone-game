@@ -22,24 +22,24 @@ const BLACK_INITIAL = [73,74,75,81,82,83,84,85,86,91,92,93,94,95];
 // Firebase config - REPLACE WITH YOUR OWN
 const FIREBASE_URL = 'https://abalone-game-c31e4-default-rtdb.europe-west1.firebasedatabase.app/';
 
-// Get neighbors (differ by 1, 9, or 11)
+// Get neighbors (differ by 1, 9, or 10)
 function getNeighbors(cell) {
   const neighbors = [];
-  const candidates = [cell-1, cell+1, cell-10, cell+10, cell-11, cell+11];
+  const candidates = [cell-1, cell+1, cell-9, cell+9, cell-10, cell+10];
   for (let c of candidates) {
     if (CELL_SET.has(c)) neighbors.push(c);
   }
   return neighbors;
 }
 
-// Check if cells form arithmetic sequence with valid differences (±1, ±9, ±11)
+// Check if cells form arithmetic sequence with valid differences (±1, ±9, ±10)
 function isArithmeticSequence(cells) {
   if (cells.length <= 1) return true;
   const sorted = [...cells].sort((a,b) => a-b);
   const diff = sorted[1] - sorted[0];
   
-  // Difference must be 1, 9, or 11
-  if (![1, 10, 11].includes(diff)) return false;
+  // Difference must be 1, 9, or 10
+  if (![1, 9, 10].includes(diff)) return false;
   
   for (let i = 2; i < sorted.length; i++) {
     if (sorted[i] - sorted[i-1] !== diff) return false;
@@ -245,7 +245,7 @@ function AbaloneGame() {
     
     const sorted = [...selected].sort((a,b) => a-b);
     const moves = [];
-    const directions = [1, -1, 10, -10, 11, -11];
+    const directions = [1, -1, 9, -9, 10, -10];
 
     for (let dir of directions) {
       const newCells = sorted.map(c => c + dir);
@@ -458,7 +458,7 @@ function AbaloneGame() {
             <p className="text-white text-center mb-2">Available Moves:</p>
             <div className="flex flex-wrap gap-2 justify-center">
               {moves.map((move, idx) => {
-                const arrow = {1: '→', [-1]: '←', 10: '↘', [-10]: '↖', 11: '↙', [-11]: '↗'}[move.dir];
+                const arrow = {1: '→', [-1]: '←', 9: '↘', [-9]: '↖', 10: '↙', [-10]: '↗'}[move.dir];
                 return (
                   <button
                     key={idx}
