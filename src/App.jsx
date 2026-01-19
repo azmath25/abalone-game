@@ -254,7 +254,7 @@ function AbaloneGame() {
       if (!newCells.every(c => CELL_SET.has(c))) continue;
 
       // Simple move: all cells empty
-      if (newCells.every(c => !board[c])) {
+      if (newCells.every(c => !board[c] || selected.includes(c))) {
         moves.push({ dir, cells: newCells, type: 'move' });
         continue;
       }
@@ -300,18 +300,18 @@ function AbaloneGame() {
 
     // Handle push
     if (move.type === 'push') {
+      // Remove pushed balls from their current spots
       move.pushed.forEach(c => delete newBoard[c]);
-      
-      if (CELL_SET.has(move.pushTo)) {
-        // Push to valid cell
-        move.pushed.forEach(c => {
-          const offset = move.pushed.indexOf(c);
-          newBoard[move.pushTo + offset * move.dir] = currentTurn === 'black' ? 'white' : 'black';
-        });
-      } else {
-        // Pushed off board - score!
-        newScores[playerRole] += move.pushed.length;
-      }
+  
+      // Calculate new position for each pushed ball
+      move.pushed.forEach(c => {
+        const nextPos = c + move.dir;
+        if (CELL_SET.has(nextPos)) {
+          newBoard[nextPos] = (playerRole === 'black' ? 'white' : 'black');
+        } else {
+          newScores[playerRole] += 1;
+        }
+      });
     }
 
     const newTurn = currentTurn === 'black' ? 'white' : 'black';
