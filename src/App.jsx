@@ -458,7 +458,7 @@ function AbaloneGame() {
             <p className="text-white text-center mb-2">Available Moves:</p>
             <div className="flex flex-wrap gap-2 justify-center">
               {moves.map((move, idx) => {
-                const arrow = {1: '→', [-1]: '←', 9: '↘', [-9]: '↖', 10: '↙', [-10]: '↗'}[move.dir];
+                const arrow = {1: '→', [-1]: '←', 10: '↘', [-10]: '↖', 9: '↙', [-9]: '↗'}[move.dir];
                 return (
                   <button
                     key={idx}
