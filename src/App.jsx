@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 // All valid cell positions on the board are
 const CELLS = [
   15,16,17,18,19,
-  24,25,26,27,28,29
+  24,25,26,27,28,29,
   33,34,35,36,37,38,39,
   42,43,44,45,46,47,48,49,
   51,52,53,54,55,56,57,58,59,
