@@ -263,8 +263,8 @@ function AbaloneGame() {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-green-900 p-4 font-sans">
-      <div className="bg-amber-900 p-6 rounded-3xl shadow-2xl border-8 border-amber-800">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-green-900 p-5 font-sans">
+      <div className="bg-amber-900 p-7 rounded-3xl shadow-2xl border-8 border-amber-800">
         <div className="flex justify-between text-white font-bold mb-4 bg-amber-950 p-3 rounded-xl">
           <div className={currentTurn === 'white' ? 'ring-2 ring-white rounded p-1' : ''}>⚪ {scores.white}</div>
           <div>{winner ? 'GAME OVER' : `${currentTurn.toUpperCase()}'S TURN`}</div>
