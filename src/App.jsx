@@ -98,6 +98,8 @@ function AbaloneGame() {
     const id = params.get('game');
     if (id) {
       setGameId(id);
+      const savedRole = localStorage.getItem(`abalone_role_${id}`);
+      if (savedRole) setPlayerRole(savedRole);
       loadGame(id);
     }
   }, []);
@@ -175,6 +177,9 @@ function AbaloneGame() {
       return;
     }
 
+    setPlayerRole(role);
+    localStorage.setItem(`abalone_role_${gameId}`, role);
+
     // Initialize board if first player
     let newBoard = currentData?.board || {};
     if (!currentPlayers.black && !currentPlayers.white) {
@@ -198,7 +203,13 @@ function AbaloneGame() {
   }
 
   function handleCellClick(cell) {
-    if (!gameStarted || currentTurn !== playerRole || winner) return;
+    // REVISED GUARD CLAUSE:
+    // 1. If there's a winner, stop.
+    if (winner) return;
+    // 2. If you aren't a player (spectator), stop.
+    if (!playerRole) return;
+    // 3. If the game HAS started, but it's not your turn, stop.
+    if (gameStarted && currentTurn !== playerRole) return;
 
     const cellColor = board[cell];
     
