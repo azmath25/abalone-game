@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// All valid cell positions on the board
+// All valid cell positions on the board are
 const CELLS = [
   15,16,17,18,19,
   24,25,26,27,28,29,
