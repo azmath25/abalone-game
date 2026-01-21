@@ -278,8 +278,8 @@ export default function AbaloneGame() {
 
       {/* THE ARENA */}
       <div className="relative group">
-        <div className="p-12 lg:p-16 bg-[#1a1a1e] rounded-[6rem] shadow-[0_50px_100px_rgba(0,0,0,0.9)] border border-white/5">
-          <div className="bg-[#0a0a0c] p-10 rounded-full shadow-inner border-[6px] border-black/40">
+        <div className="p-12 lg:p-16 bg-[#7d9c78] rounded-[6rem] shadow-[0_50px_100px_rgba(0,0,0,20)] border border-white/5">
+          <div className="bg-[#65f7e4] p-10 rounded-full shadow-inner border-[6px] border-black/40">
             {displayRows.map((row, idx) => (
               <div key={idx} className="flex justify-center mb-2">
                 {row.map(cell => {
