@@ -292,13 +292,13 @@ export default function AbaloneGame() {
                       onClick={() => mv ? makeMove(mv) : handleCellClick(cell)}
                       className={`w-12 h-12 lg:w-16 lg:h-16 rounded-full mx-1.5 transition-all relative duration-300
                         ${color === 'white' ? 'bg-gradient-to-br from-white to-slate-600 to-black shadow-2xl' : 
-                          color === 'black' ? 'bg-gradient-to-br from-slate-600 to-black shadow-2xl' : 'bg-slate-900/30'}
+                          color === 'black' ? 'bg-gradient-to-br from-slate-600 to-black shadow-2xl' : 'bg-blue-600/30'}
                         ${isSel ? 'scale-110 ring-[4px] ring-blue-500 ring-offset-4 ring-offset-[#0a0a0c]' : ''}
                         ${mv ? 'cursor-pointer ring-2 ring-blue-400/50 scale-105' : ''}`}
                     >
                       {mv && (
                         <div className={`absolute inset-0 rounded-full animate-pulse flex items-center justify-center ${mv.type === 'push' ? 'bg-red-500/30' : 'bg-blue-400/30'}`}>
-                          <span className="text-[10px]">{mv.type === 'push' ? '💥' : '🎯'}</span>
+                          <span className="text-[10px]">{mv.type === 'push' ? '.' : '.'}</span>
                         </div>
                       )}
                     </button>
